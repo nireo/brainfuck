@@ -25,8 +25,9 @@ fn parse_brainfuck(code: &str) -> Vec<Op> {
         .collect()
 }
 
+// Interpreter struct holds the state of the program.
+// the expected implementation is described here https://en.wikipedia.org/wiki/Brainfuck
 struct Interpreter {
-    program_ptr: usize,
     inst_ptr: usize,
     data_ptr: usize,
     memory: [u8; 30_000],
@@ -35,7 +36,6 @@ struct Interpreter {
 impl Interpreter {
     fn new() -> Self {
         Self {
-            program_ptr: 0,
             inst_ptr: 0,
             data_ptr: 0,
             memory: [0; 30_000],
@@ -93,8 +93,13 @@ impl Interpreter {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let content = std::fs::read_to_string("code.bf")?;
+    let args = std::env::args().collect::<Vec<String>>();
+    if args.len() != 2 {
+        eprintln!("Usage: {} <filename>", args[0]);
+        return Err("Invalid number of arguments".into());
+    }
 
+    let content = std::fs::read_to_string(&args[1])?;
     let ops = parse_brainfuck(&content);
     let mut interpreter = Interpreter::new();
     interpreter.run(&ops);
